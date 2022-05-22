@@ -22,6 +22,7 @@ public:
     Worker create(string rec);
     static void all();
     static Worker find(short int worker_id);
+    static Worker search(string workerName);
     static void remove(short int worker_id);
     void update(string name, bool role, short int salary);
 
@@ -54,14 +55,14 @@ Worker Worker::create(string rec) {
     strcpy(char_array, path.c_str());
 
     fstream workerFile;
-    workerFile.open(char_array, ios::app | ios::out | ios::binary);
+    workerFile.open(char_array, ios::app | ios::out | ios::binary );
 
     if (workerFile.is_open()){
         char *mem_block = new char[rec.length() + 1];
         strcpy(mem_block, rec.c_str());
         workerFile.write(mem_block, rec.length());
-        workerFile.close();
     }
+    workerFile.close();
     
 }
 
@@ -187,8 +188,59 @@ Worker Worker::find(short int worker_id){
 
             
         }
-        if (!exists) cout<< "worker not found"<<endl;
+        if (!exists) cout<< "\nworker not found\n"<<endl;
         workerFile.close();
+        Worker w(0, "", 0, 0);
+        return w;
+    }
+}
+
+Worker Worker::search(string workerName){
+    const string path = GENERATE_PATH("stores/workers.txt");
+    
+    char char_array[path.length() + 1];
+    strcpy(char_array, path.c_str());
+
+    fstream workerFile;
+    workerFile.open(char_array, ios::in | ios::binary);
+
+    if (workerFile.is_open()) {
+        bool exists = false;
+        while (1)
+        {
+            if (workerFile.eof()) break;
+            
+            string worker;
+            getline(workerFile, worker, '\n');
+            if (worker == "") break;
+            
+            std::istringstream iss(worker);
+            
+            string arr[5];
+            int i = 0;
+            for (std::string token; std::getline(iss, token, ','); )
+            {
+                arr[i] = token;
+                i++;
+            }
+
+            if (arr[0][0] == '!') continue;
+
+            short int id = stoi(arr[1]);
+            string name = arr[2];
+            short int role = stoi(arr[3]);
+            short int sallary = stoi(arr[4]);
+            if (!name.compare(workerName)) {
+                Worker w(id, name, role, sallary);
+                return w;
+            }
+
+            
+        }
+        if (!exists) cout<< "\nworker not found\n"<<endl;
+        workerFile.close();
+        Worker w(0, "", 0, 0);
+        return w;
     }
 }
 
@@ -250,13 +302,12 @@ void Worker::remove(short int worker_id){
 
 void Worker::update(string name, bool role, short int salary){
     short int id = this->id;
-
     this->name = name;
     this->role = role;
     this->sallary = sallary;
 
-    remove(id);
-    Worker w(id, name, role, salary);
+    remove(this->id);
+    Worker w(this->id, name, role, salary);
     string rec = w.makeRecord(2);
     w.create(rec);
 }

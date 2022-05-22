@@ -23,6 +23,7 @@ public:
     string makeRecord(short int recStatus);
     static void all();
     static Product find(short int product_id);
+    static Product search(string productName);
     static void remove(short int product_id);
     void update(string name, string color, short int price, string size);
 };
@@ -191,8 +192,62 @@ Product Product::find(short int product_id){
 
             
         }
-        if (!exists) cout<< "product not found"<<endl;
+        if (!exists) cout<< "\nproduct not found\n"<<endl;
         productFile.close();
+        Product p(0, "", "", 0, 0);
+        return p;
+    }
+}
+
+Product Product::search(string productName){
+    const string path = GENERATE_PATH("stores/products.txt");
+    
+    char char_array[path.length() + 1];
+    strcpy(char_array, path.c_str());
+
+    fstream productFile;
+    productFile.open(char_array, ios::in | ios::binary);
+
+    if (productFile.is_open()) {
+        bool exists = false;
+        while (1)
+        {
+            if (productFile.eof()) break;
+            
+            string worker;
+            getline(productFile, worker, '\n');
+            if (worker == "") break;
+            
+            std::istringstream iss(worker);
+            
+            string arr[6];
+            int i = 0;
+            for (std::string token; std::getline(iss, token, ','); )
+            {
+                arr[i] = token;
+                i++;
+            }
+
+            if (arr[0][0] == '!') continue;
+
+            short int id = stoi(arr[1]);
+            string name = arr[2];
+            string color = arr[3];
+            short int price = stoi(arr[4]);
+            string size = arr[5];
+
+            if (!name.compare(productName)) {
+                Product p(id, name, color, price, size);
+                return p;
+            }
+
+            
+        }
+        if (!exists) cout<< "\nproduct not found\n"<<endl;
+        productFile.close();
+        Product p(0, "", "", 0, 0);
+        return p;
+        
     }
 }
 
@@ -264,6 +319,3 @@ void Product::update(string name, string color, short int price, string size){
     string rec = p.makeRecord(2);
     p.create(rec);
 }
-
-
-

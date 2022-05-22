@@ -193,8 +193,10 @@ Order Order::find(short int order_id){
 
             
         }
-        if (!exists) cout<< "order not found"<<endl;
+        if (!exists) cout<< "\norder not found\n"<<endl;
         orderFile.close();
+        Order o(0, 0, 0, 0, "");
+        return o;
     }
 }
 
